@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>4MandakShop Admin</title>
+  <link rel="manifest" href="manifest-admin.json">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="4M Admin">
+  <style>
+    html, body { margin:0; height:100%; background:#000; overflow:hidden; }
+    body { padding-top:env(safe-area-inset-top); box-sizing:border-box; font-family:-apple-system, system-ui, sans-serif; }
+    iframe { display:block; border:0; width:100%; height:100%; background:#fff; }
+    #splash { position:fixed; inset:0; background:#000; color:#f4b6c2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; transition:opacity .4s; z-index:2; }
+    #splash img { width:150px; height:150px; border-radius:50%; }
+    #splash.gone { opacity:0; pointer-events:none; }
+    #splash .msg { font-size:14px; text-align:center; padding:0 24px; line-height:1.5; }
+    #splash a { color:#fff; }
+    .dots span { display:inline-block; width:8px; height:8px; margin:0 3px; border-radius:50%; background:#f4b6c2; animation:b 1s infinite; }
+    .dots span:nth-child(2) { animation-delay:.15s; } .dots span:nth-child(3) { animation-delay:.3s; }
+    @keyframes b { 50% { opacity:.2; } }
+  </style>
+</head>
+<body>
+  <div id="splash"><img src="logo.png" alt="4MandakShop"><div class="dots"><span></span><span></span><span></span></div><div class="msg" id="msg"></div></div>
+  <iframe id="shop" title="4MandakShop Admin" allow="clipboard-write; camera"></iframe>
+  <script src="config.js"></script>
+  <script>
+    (function () {
+      var splash = document.getElementById('splash'), msg = document.getElementById('msg'), frame = document.getElementById('shop');
+      var base = (typeof SHOP_URL === 'string' ? SHOP_URL : '').trim();
+      if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(base)) {
+        msg.innerHTML = 'The shop link is not set yet.<br>Paste your web app link (ending in /exec) into config.js.';
+        document.querySelector('.dots').style.display = 'none';
+        return;
+      }
+      // Pass ?order=... through, and open the admin page for the admin app.
+      var q = new URLSearchParams(location.search);
+      q.set('admin', '1');
+      var url = base + (q.toString() ? '?' + q.toString() : '');
+      frame.onload = function () { splash.classList.add('gone'); };
+      setTimeout(function () {
+        if (!splash.classList.contains('gone')) msg.innerHTML = 'Taking long? <a href="' + url + '">Open the shop directly</a>';
+      }, 12000);
+      frame.src = url;
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
+    })();
+  </script>
+</body>
+</html>
